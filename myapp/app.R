@@ -14,7 +14,7 @@ ui <- fluidPage(
   titlePanel("Addition Challenge"),
   sidebarLayout(
     sidebarPanel(width = 2,
-                 numericInput("num_digits", "Number of Digits:", value = 2, min = 1, max = 6),
+                 numericInput("num_digits", "Number of Digits:", value = 2, min = 1, max = 3, step = 1),
                  actionButton('generate','new addition')
     ),
     mainPanel(
@@ -23,7 +23,8 @@ ui <- fluidPage(
       h2("+"),
       h2(textOutput("num2")),
       textInput("answer", "Your Answer:", placeholder = "Enter sum here"),
-      actionButton("submit", "Submit"),
+      actionButton("submit", "Check Result"),
+      br(),
       ## shiny::tableOutput('resutl')
       verbatimTextOutput("result")
     )
@@ -32,13 +33,25 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
+  digits <- reactive({
+    val <- input$num_digits
+    if(val>3){
+val <- 3
+    }else if(val==0){
+val <- 1
+    }else{
+val <- input$num_digits
+    }
+
+  })
+
   number1 <- eventReactive(input$generate,{
-   num <-  paste0(sample(0:9, input$num_digits, replace = TRUE), collapse = "")
+   num <-  paste0(sample(0:9, digits(), replace = TRUE), collapse = "")
    num
   })
 
   number2 <- eventReactive(input$generate,{
-   num <-  paste0(sample(0:9, input$num_digits, replace = TRUE), collapse = "")
+   num <-  paste0(sample(0:9, digits(), replace = TRUE), collapse = "")
    num
   })
 
@@ -74,7 +87,8 @@ server <- function(input, output) {
     ans <- result_final()
     user_ans <- given_ans()
     if(user_ans==ans){
-"correct"
+
+paste0("you are correct. answer is: ", as.character(ans))
     }else{
 paste0("incorrect. correct answer is: ", as.character(ans))
     }
@@ -83,6 +97,12 @@ paste0("incorrect. correct answer is: ", as.character(ans))
   })
 
 
+
+  ## observeEvent(input$generate, {
+  ##   output$result <- renderText({
+  ##     ""
+  ##   })
+  ## })
 
   ## output$result <- shiny::renderDataTable({
   ##   result_final <- as.numeric(result_final())
